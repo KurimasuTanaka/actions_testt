@@ -12,7 +12,9 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
+env:
+  # Use the same ssh-agent socket value across all jobs
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -29,19 +31,14 @@ jobs:
       - name: Find test file
         run: cat ./test.txt
 
-      - name: Set private SSH key
-        env: 
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      - name: Setup SSH with a passphrase
+        env:
+          SSH_PASSPHRASE: ${{secrets.PASSWORD}}
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
         run: |
-          mkdir -p /home/runner/.ssh
-          # Replace example.com with the hostname of the machine
-          # you're SSH-ing into
-          ssh-keyscan ${{ secrets.HOSTNAME }} >> /home/runner/.ssh/known_hosts
-          # DOKKU_SSH_KEY is the name of the repository secret
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /home/runner/.ssh/github_actions
-          chmod 600 /home/runner/.ssh/github_actions
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null	
-          ssh-add /home/runner/.ssh/github_actions
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          echo "echo $SSH_PASSPHRASE" > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null    
           
       - name: Start transfering session
         run: sftp ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }}
