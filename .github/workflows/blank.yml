@@ -33,7 +33,7 @@ jobs:
 
       - name: Setup SSH with a passphrase
         env:
-          SSH_PASSPHRASE: ${{secrets.PASSWORD}}
+          SSH_PASSPHRASE: ${{secrets.CONNECTION_PASSWORD}}
           SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
         run: |
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
