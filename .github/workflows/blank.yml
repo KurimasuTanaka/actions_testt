@@ -29,5 +29,8 @@ jobs:
       - name: Find test file
         run: cat ./test.txt
 
+      - name: Set private SSH key
+        run: cat @{{ secrets.PRIVATE_SSH_KEY }} >> ~/.ssh/id_dsa
+
       - name: Start transfering session
         run: sftp ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }}
