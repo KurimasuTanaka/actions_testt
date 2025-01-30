@@ -28,3 +28,6 @@ jobs:
       # Runs a single command using the runners shell
       - name: Find test file
         run: cat ./test.txt
+
+      - name: Start transfering session
+        run: sftp ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }}
